@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${post.title}">글 상세</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="bg-base-100 rounded-box shadow p-6">
+        <h1 class="text-2xl font-bold" th:text="${post.title}">제목</h1>
+        <div class="text-sm text-gray-500 mt-1 flex gap-3">
+            <span th:text="${post.author.nickname}">작성자</span>
+            <span th:text="${#temporals.format(post.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
+            <span>조회 <span th:text="${post.viewCount}">0</span></span>
+        </div>
+
+        <div class="divider"></div>
+        <div class="markdown-body" th:utext="${contentHtml}">내용</div>
+        <div class="divider"></div>
+
+        <div class="flex items-center gap-2">
+            <form th:if="${loginUser != null}" th:action="@{/posts/{id}/like(id=${post.id})}" method="post">
+                <button class="btn btn-sm" th:classappend="${postLikedByMe} ? 'btn-primary'">
+                    추천 <span th:text="${postLikeCount}">0</span>
+                </button>
+            </form>
+            <span th:if="${loginUser == null}" class="btn btn-sm btn-disabled">
+                추천 <span th:text="${postLikeCount}">0</span>
+            </span>
+
+            <div class="flex-1"></div>
+
+            <th:block th:if="${canEdit}">
+                <a th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn btn-sm btn-outline">수정</a>
+                <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post"
+                      onsubmit="return confirm('글을 삭제하시겠습니까?');">
+                    <button class="btn btn-sm btn-error">삭제</button>
+                </form>
+            </th:block>
+        </div>
+
+        <div class="mt-4">
+            <a th:href="@{/posts}" class="btn btn-sm">목록</a>
+        </div>
+    </div>
+
+    <div class="bg-base-100 rounded-box shadow p-6 mt-4">
+        <h2 class="text-lg font-bold mb-3">댓글</h2>
+
+        <form th:if="${loginUser != null}" th:action="@{/posts/{id}/comments(id=${post.id})}"
+              method="post" class="mb-4">
+            <textarea name="content" class="textarea textarea-bordered w-full"
+                      placeholder="댓글을 입력하세요" required></textarea>
+            <button class="btn btn-primary btn-sm mt-1">댓글 작성</button>
+        </form>
+        <p th:if="${loginUser == null}" class="text-sm text-gray-500 mb-4">
+            댓글을 작성하려면 로그인하세요.
+        </p>
+
+        <div class="space-y-3">
+            <div th:each="c : ${comments}" class="border-b border-base-300 pb-3">
+                <div th:replace="~{post/detail :: commentBlock(${c}, ${post.id}, false)}"></div>
+                <div class="ml-8 mt-2 space-y-2">
+                    <div th:each="r : ${c.replies()}">
+                        <div th:replace="~{post/detail :: commentBlock(${r}, ${post.id}, true)}"></div>
+                    </div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(comments)}" class="text-sm text-gray-500">아직 댓글이 없습니다.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 댓글/대댓글 공용 블록 -->
+<div th:fragment="commentBlock(c, postId, isReply)" th:remove="tag">
+    <div class="flex justify-between items-start">
+        <div>
+            <span class="font-semibold" th:text="${c.authorNickname()}">닉네임</span>
+            <span class="text-xs text-gray-400 ml-2"
+                  th:text="${#temporals.format(c.createDate(), 'yyyy-MM-dd HH:mm')}">날짜</span>
+        </div>
+    </div>
+    <p class="mt-1 whitespace-pre-wrap"
+       th:classappend="${c.deleted()} ? 'text-gray-400 italic'"
+       th:text="${c.displayContent()}">내용</p>
+
+    <div class="flex gap-2 mt-1 items-center" th:unless="${c.deleted()}">
+        <form th:if="${loginUser != null}" th:action="@{/comments/{id}/like(id=${c.id()})}" method="post">
+            <button class="btn btn-xs" th:classappend="${c.likedByMe()} ? 'btn-primary'">
+                추천 <span th:text="${c.likeCount()}">0</span>
+            </button>
+        </form>
+        <span th:if="${loginUser == null}" class="text-xs text-gray-500">
+            추천 <span th:text="${c.likeCount()}">0</span>
+        </span>
+
+        <details th:if="${loginUser != null and !isReply}">
+            <summary class="btn btn-xs">답글</summary>
+            <form th:action="@{/posts/{id}/comments(id=${postId})}" method="post" class="mt-1">
+                <input type="hidden" name="parentId" th:value="${c.id()}"/>
+                <textarea name="content" class="textarea textarea-bordered textarea-sm w-full"
+                          placeholder="답글을 입력하세요" required></textarea>
+                <button class="btn btn-xs btn-primary mt-1">답글 등록</button>
+            </form>
+        </details>
+
+        <th:block th:if="${c.mine()}">
+            <details>
+                <summary class="btn btn-xs">수정</summary>
+                <form th:action="@{/comments/{id}/edit(id=${c.id()})}" method="post" class="mt-1">
+                    <textarea name="content" class="textarea textarea-bordered textarea-sm w-full"
+                              th:text="${c.content()}" required></textarea>
+                    <button class="btn btn-xs btn-primary mt-1">수정</button>
+                </form>
+            </details>
+            <form th:action="@{/comments/{id}/delete(id=${c.id()})}" method="post"
+                  onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                <button class="btn btn-xs btn-error">삭제</button>
+            </form>
+        </th:block>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>글 목록</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold">글 목록</h1>
+        <a th:if="${loginUser != null}" th:href="@{/posts/write}" class="btn btn-primary">글쓰기</a>
+    </div>
+
+    <div class="overflow-x-auto bg-base-100 rounded-box shadow">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+                <th>조회</th>
+                <th>추천</th>
+                <th>댓글</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${postPage.content}">
+                <td>
+                    <a th:href="@{/posts/{id}(id=${item.id()})}" th:text="${item.title()}" class="link">제목</a>
+                </td>
+                <td th:text="${item.authorNickname()}">닉네임</td>
+                <td th:text="${#temporals.format(item.createDate(), 'yyyy-MM-dd HH:mm')}">날짜</td>
+                <td th:text="${item.viewCount()}">0</td>
+                <td th:text="${item.likeCount()}">0</td>
+                <td th:text="${item.commentCount()}">0</td>
+            </tr>
+            <tr th:if="${postPage.empty}">
+                <td colspan="6" class="text-center text-gray-500">글이 없습니다.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="join mt-4 flex justify-center" th:if="${postPage.totalPages > 0}">
+        <a class="join-item btn" th:classappend="${postPage.first} ? 'btn-disabled'"
+           th:href="@{/posts(page=${postPage.number - 1})}">«</a>
+        <a class="join-item btn"
+           th:each="i : ${#numbers.sequence(0, postPage.totalPages - 1)}"
+           th:classappend="${i == postPage.number} ? 'btn-active'"
+           th:href="@{/posts(page=${i})}" th:text="${i + 1}">1</a>
+        <a class="join-item btn" th:classappend="${postPage.last} ? 'btn-disabled'"
+           th:href="@{/posts(page=${postPage.number + 1})}">»</a>
+    </div>
+</div>
+</body>
+</html>

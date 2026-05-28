@@ -1,0 +1,10 @@
+spring:
+  profiles:
+    active: dev
+  thymeleaf:
+    cache: false
+  jpa:
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: true
