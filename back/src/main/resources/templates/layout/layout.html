@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title layout:title-pattern="$CONTENT_TITLE - 게시판">게시판</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@latest/dist/web/static/pretendard-dynamic-subset.css"/>
+    <style>
+        :root { font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        body { font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+        .markdown-body :where(h1, h2, h3) { font-weight: 700; margin: 0.6em 0 0.3em; }
+        .markdown-body h1 { font-size: 1.6rem; }
+        .markdown-body h2 { font-size: 1.35rem; }
+        .markdown-body h3 { font-size: 1.15rem; }
+        .markdown-body p { margin: 0.5em 0; }
+        .markdown-body ul { list-style: disc; padding-left: 1.4em; margin: 0.5em 0; }
+        .markdown-body ol { list-style: decimal; padding-left: 1.4em; margin: 0.5em 0; }
+        .markdown-body pre { background: #f4f4f5; padding: 0.75rem; border-radius: 0.5rem; overflow: auto; }
+        .markdown-body code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+        .markdown-body a { color: #2563eb; text-decoration: underline; }
+    </style>
+</head>
+<body class="min-h-screen bg-base-200">
+<div class="navbar bg-base-100 shadow">
+    <div class="flex-1">
+        <a th:href="@{/}" class="btn btn-ghost text-xl">게시판</a>
+        <a th:href="@{/posts}" class="btn btn-ghost">글 목록</a>
+    </div>
+    <div class="flex-none gap-2">
+        <th:block th:if="${loginUser == null}">
+            <a th:href="@{/member/login}" class="btn btn-ghost">로그인</a>
+            <a th:href="@{/member/join}" class="btn btn-primary">회원가입</a>
+        </th:block>
+        <th:block th:if="${loginUser != null}">
+            <a th:href="@{/member/me}" class="btn btn-ghost">
+                <span th:text="${loginUser.nickname}">닉네임</span> 님
+            </a>
+            <form th:action="@{/member/logout}" method="post" class="inline">
+                <button type="submit" class="btn btn-ghost">로그아웃</button>
+            </form>
+        </th:block>
+    </div>
+</div>
+
+<main class="container mx-auto max-w-3xl p-4">
+    <div layout:fragment="content">
+        기본 내용
+    </div>
+</main>
+</body>
+</html>
