@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>내 정보</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="card bg-base-100 shadow max-w-md mx-auto">
+        <div class="card-body">
+            <h2 class="card-title">내 정보</h2>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">아이디</span></label>
+                <input type="text" th:value="${member.username}" class="input input-bordered w-full" disabled/>
+            </div>
+
+            <form th:action="@{/member/me}" th:object="${form}" method="post" class="space-y-2 mt-2">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-error">
+                    <span th:each="err : ${#fields.globalErrors()}" th:text="${err}">오류</span>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">닉네임</span></label>
+                    <input type="text" th:field="*{nickname}" class="input input-bordered w-full"/>
+                    <p class="text-error text-sm" th:if="${#fields.hasErrors('nickname')}"
+                       th:errors="*{nickname}">닉네임 오류</p>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text">새 비밀번호 (변경 시에만 입력)</span></label>
+                    <input type="password" th:field="*{password}" placeholder="비워두면 변경 안 함"
+                           class="input input-bordered w-full"/>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">수정하기</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
